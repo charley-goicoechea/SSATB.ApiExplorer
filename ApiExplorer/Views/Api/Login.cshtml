@@ -1,0 +1,47 @@
+﻿@model SSATB.ApiExplorer.Models.ApiCredentials
+@{
+    ViewBag.Title = "Login";
+}
+
+@using (Html.BeginForm("Login", "Api", new { referrer = ViewBag.Referrer }, FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    <div class="row">
+        <div class="col-lg-6">
+            <fieldset>
+                <legend>Log in with your API credentials</legend>
+                <div class="form-group">
+                    @Html.LabelFor(m => m.ClientId, new { @class = "col-sm-4 control-label" })
+                    <div class="col-sm-8">
+                        @Html.EditorFor(m => m.ClientId)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(m => m.ClientSecret, new { @class = "col-sm-4 control-label" })
+                    <div class="col-sm-8">
+                        @Html.EditorFor(m => m.ClientSecret)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(m => m.OrgId, new { @class = "col-sm-4 control-label" })
+                    <div class="col-sm-8">
+                        @Html.EditorFor(m => m.OrgId)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-8">
+                        @Html.ValidationSummary(false)
+                        <input type="submit" value="Login" class="btn btn-primary" />
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div class="col-lg-6">
+            <fieldset>
+                <legend>-or Log in with a user account</legend>
+            </fieldset>
+            <div id="SSATBLogo2">
+                <a href="@ViewBag.AuthorizeUrl">yo!</a>
+            </div>
+        </div>
+    </div>
+}

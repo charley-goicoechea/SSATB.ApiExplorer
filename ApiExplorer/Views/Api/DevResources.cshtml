@@ -1,0 +1,211 @@
+﻿<script src="~/Scripts/toc.min.js" type="text/javascript"></script>
+<div id="devresourcescontainer">
+    <div id="toc"></div>
+    <div id="docs">
+        <h1>API Documentation</h1>
+        Data integration doesn't have to be painful. Use SSATB API  services to get real-time student data and records to enhance your database and enrollment management solutions.
+
+        <h2>An Introduction to our API’s</h2>
+        <p>The acronym "API" stands for Application Program Interface and is a term used to describe anything that facilitates interaction with a system or data set. The term API is loosely used to refer to anything from documentation that details how something works to core functions within an existing system, to an entire, separate system which accesses another system or a data set.</p>
+        <p>While the acronym "API" is used in different contexts to mean different things, in this context, the SSATB’s API is simply a service designed to allow an easy and consistent interface with the existing SSATB’s services – applications, test scores and inquiries. In other words, the SSATB’s API is a web service that lets you programmatically interface with SSATB’s system. As the API user, you will write a program (the client) that makes requests (i.e. API calls) to the SSATB API service and receive a response.</p>
+        <p>SSATB’s API is a RESTful API, you can think of the basic interaction between an API client (the program you, as the developer, will write) and the SSATB’s API service as very similar to an actual human being browsing the web. The human uses a client program (a web browser like Firefox or Safari) to make requests to a web server ( for instance google.com). The request the web browser makes is specifically formatted to follow HTTP standards, and the response (a web page containing text, images, flash files, etc.) follows the same standard. In this way, you will write a program that sends a specifically formatted request to the SSATB’s API, receives a response, parses it, and then does whatever you may want based on the given response.</p>
+        <p>Please read through all the material available in this wiki to learn about our API’s. We will post more resources, examples as they become available.</p>
+
+        <h2>Authentication</h2>
+        SSATB's APIs are protected using standard <a href="http://oauth.net/2/">OAuth 2</a>.  Please see the following sections for details on supported scenarios.
+
+        <h3>Supported Flows</h3>
+        The following OAuth grant types are supported:
+        <ul>
+            <li><a href="http://tools.ietf.org/html/rfc6749#section-4.1" target="_blank">Authorization Code</a></li>
+            <li><a href="http://tools.ietf.org/html/rfc6749#section-4.4" target="_blank">Client Credentials</a></li>
+            <li><a href="http://tools.ietf.org/html/rfc6749#section-6" target="_blank">Refresh Token</a></li>
+        </ul>
+
+        <h3>Token Lifetimes</h3>
+        <p>
+            For security reasons, tokens issued by the SSATB token services expire after a set time.  The TTL for each token type is:
+            <table>
+                <tr><th>Authorization Code:</th><td>5 minutes</td></tr>
+                <tr><th>Access Token:</th><td>1 hour</td></tr>
+                <tr><th>Refresh Token:</th><td>30 days</td></tr>
+            </table>
+        </p>
+        <p>
+            Applications that use the API must take the expiration period into account.  For example, if the application is developed using the client credentials flow
+            for a system-to-system integration, the application must periodically request new access tokens instead of requesting one at startup
+            and using it for the lifetime of the application.
+        </p>
+        <p>
+            The expiration time for the access token is also included in the token response under the expires_in field (reported in seconds).
+            Applications are encouraged to dynamically refresh or request new access tokens based on this value instead of hard-coding it to the
+            values in the above table in case the lifetimes change in a future release.
+        </p>
+
+        <h3>Identity and Security</h3>
+        <p>Identity information is captured during the Access Token request and embedded within the token.  This allows the APIs to understand who the caller is with just the API token alone.</p>
+        <p>Depending on which grant type is used, the token either contains generic information about a member school, or a specific user.</p>
+
+        <h4>School</h4>
+        School information is provided when using the Client Credentials grant type.  The school information is passed in as a four-letter school code in the OAuth scope parameter.  SSATB maintains
+        a list of authorized school codes for each API consumer, and will only grant an Access Token if the requested school code is in the authorized list.  Once granted, the access token is
+        scoped to that school and will only grant access to data within that school.  If an API consumer needs access to multiple schools, they will need to request multiple access tokens (one for each school).
+
+        <h4>User</h4>
+        User information is captured when using the Authorization Code grant type using <a href="http://openid.net/connect/">OpenID Connect</a>.  For the most part, the OpenID Connect details
+        are implemented internally by the SSATB token services, so it takes care of the hard parts such as parsing and validating identity tokens.  The identity token claims are embedded within the
+        API Access Token and transparently sent through to the APIs on each invocation.  However, there are some parts of OpenID Connect that are exposed:
+        <ul>
+            <li>The OpenID Connect-defined scope extensions must be passed in when requesting an authorization code.  If they are not provided, the token services will return an Access Token without any identity information.</li>
+            <li>Parts of the optional Session Management spec are supported.  Specifically, the <a href="http://openid.net/specs/openid-connect-session-1_0.html#RPLogout" target="_blank">logout</a>
+            functionality is available through the endSession endpoint.</li>
+        </ul>
+
+        <h3>CORS</h3>
+        For security reasons, the SSATB Token Services does not support Cross Origin Resource Sharing to mitigate the possibility of API credentials getting leaked from client-side logic.
+
+        <h3>Sample Requests</h3>
+        These are sample requests and responses for the supported OAuth flows:
+
+        <h4>Request an Access Token using Client Credentials</h4>
+        <h5>Request:</h5>
+        Note that the school code must be passed in as the OAuth scope.
+        <pre>
+POST @(ViewBag.AuthorizationServerEndpoint)/token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=<em>client_credentials</em>&client_id=[your clientid]&client_secret=[your client secret]&scope=<em>4564</em>
+</pre>
+
+        <h5>Response:</h5>
+        <pre>
+{
+    "issued_at": "1436962306226",
+    "claims": "",
+    "application_name": "9686f870-cf48-4d17-bd69-02c6597496f0",
+    "scope": "4564",
+    "status": "approved",
+    "api_product_list": "[SSATB All APIs]",
+    "expires_in": "<em>3599</em>",
+    "developer.email": "xxxxxx",
+    "org_id": "4564",
+    "token_type": "Bearer",
+    "client_id": "[your clientid]",
+    "access_token": "<em>8ebb5565617d47637536d9f9a3510ce7</em>",
+    "organization_name": "ssatbdev",
+    "refresh_token_expires_in": "0",
+    "refresh_count": "0"
+}
+</pre>
+
+        <h4>Request an Authorization Code</h4>
+        <h5>Request:</h5>
+        Note that the OpenID Connect scopes ("openid profile") must be requested to obtain identity information.  Also note that refresh tokens are requested through the "offline_access" scope.
+        <pre>
+GET @(ViewBag.AuthorizationServerEndpoint)/authorize?response_type=<em>code</em>&client_id=[your clientid]&redirect_uri=[your redirecturl]&scope=<em>openid%20profile%20offline_access</em> HTTP/1.1
+</pre>
+
+        <h5>Response:</h5>
+        Note that the user may be presented with a logon page, and there may be a series of intermediary redirects before the final redirect response to your redirect url.
+        <pre>
+HTTP/1.1 302 Found
+Location: [your redirecturl]?code=<em>1321caca8e9dcdd209946d3a9dca60b4</em>
+</pre>
+
+        <h4>Exchange an Authorization Code for an Access Token</h4>
+        <h5>Request:</h5>
+        <pre>
+POST @(ViewBag.AuthorizationServerEndpoint)/token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=<em>authorization_code</em>&code=<em>1321caca8e9dcdd209946d3a9dca60b4</em>&client_id=[your clientid]&client_secret=[your clientsecret]&redirect_uri=[your redirecturl]
+</pre>
+        <h5>Response:</h5>
+        Note that the identity information of the user is returned in the claims field if the OpenID Connect scopes were requested.
+        Also note that a refresh token is returned if the offline_access scope was requested.
+        <pre>
+{
+    "issued_at": "1436963673730",
+    "claims": "<em>{\"iat\":1436963672,\"sub\":[\"c5a90ca3-cff7-e211-bcde-080027428de1\",\"ssat4564@ssat.org\"],\"amr\":\"password\",\"auth_time\":1436962743,\"idp\":\"idsrv\",\"orgid\":\"4564\",\"iss\":\"https://ssatb-authorization-dev.azurewebsites.net\",\"aud\":\"m7sSx8RfpZNuFqAYZLrEyhgL\",\"exp\":1436963972,\"nbf\":1436963672}</em>",
+    "scope": "openid profile offline_access",
+    "application_name": "9686f870-cf48-4d17-bd69-02c6597496f0",
+    "refresh_token_issued_at": "1436963673730",
+    "status": "approved",
+    "refresh_token_status": "approved",
+    "api_product_list": "[SSATB All APIs]",
+    "expires_in": "<em>3599</em>",
+    "developer.email": "xxxxx",
+    "org_id": "",
+    "token_type": "Bearer",
+    "refresh_token": "<em>d0d11b0dfa00cb23b86cd426d2b35923</em>",
+    "client_id": "[your clientid]",
+    "access_token": "<em>3416fe3a450aa17a37cb1e7795ad08bb</em>",
+    "organization_name": "ssatbdev",
+    "refresh_token_expires_in": "0",
+    "refresh_count": "0"
+}
+</pre>
+
+        <h4>Obtain a new Access Token with a Refresh Token</h4>
+        Note that refresh tokens are only enabled and valid when using the Authorization Code grant type.
+        <h5>Request:</h5>
+        <pre>
+POST @(ViewBag.AuthorizationServerEndpoint)/token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=<em>refresh_token</em>&refresh_token=<em>d0d11b0dfa00cb23b86cd426d2b35923</em>&client_id=[your clientid]&client_secret=[your clientsecret]&redirect_uri=[your redirecturl]
+</pre>
+        <h5>Response:</h5>
+        Note that in addition to issuing a new access token, the token server may issue a new refresh token that replaces the old one.
+        <pre>
+{
+    "issued_at": "1436964584515",
+    "claims": "{\"iat\":1436964559,\"sub\":[\"c5a90ca3-cff7-e211-bcde-080027428de1\",\"ssat4564@ssat.org\"],\"amr\":\"password\",\"auth_time\":1436962743,\"idp\":\"idsrv\",\"orgid\":\"4564\",\"iss\":\"https://ssatb-authorization-dev.azurewebsites.net\",\"aud\":\"m7sSx8RfpZNuFqAYZLrEyhgL\",\"exp\":1436964859,\"nbf\":1436964559}",
+    "scope": "openid profile offline_access any",
+    "application_name": "9686f870-cf48-4d17-bd69-02c6597496f0",
+    "refresh_token_issued_at": "1436964584515",
+    "status": "approved",
+    "refresh_token_status": "approved",
+    "api_product_list": "[SSATB All APIs]",
+    "expires_in": "3599",
+    "id_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImEzck1VZ01Gdjl0UGNsTGE2eUYzekFrZnF1RSIsImtpZCI6ImEzck1VZ01Gdjl0UGNsTGE2eUYzekFrZnF1RSJ9.eyJpYXQiOjE0MzY5NjQ1NTksInN1YiI6WyJjNWE5MGNhMy1jZmY3LWUyMTEtYmNkZS0wODAwMjc0MjhkZTEiLCJzc2F0NDU2NEBzc2F0Lm9yZyJdLCJhbXIiOiJwYXNzd29yZCIsImF1dGhfdGltZSI6MTQzNjk2Mjc0MywiaWRwIjoiaWRzcnYiLCJvcmdpZCI6IjQ1NjQiLCJpc3MiOiJodHRwczovL3NzYXRiLWF1dGhvcml6YXRpb24tZGV2LmF6dXJld2Vic2l0ZXMubmV0IiwiYXVkIjoibTdzU3g4UmZwWk51RnFBWVpMckV5aGdMIiwiZXhwIjoxNDM2OTY0ODU5LCJuYmYiOjE0MzY5NjQ1NTl9.mMbP3ESqzWqrol-cdNPrZOKm5jQPNCDWY90nQD7bVfqFSRCGShzBib2NIpEyP_Ae6sLARjtrZorsZ6EKVHJ_C7mnCiaA1LCNe7f4BBVKxfoQw-U9CDztBF97vS8aLrnlZP0X7IfUGGJF1SiPDF0tJYMPn-alLIzPr2IsChgDJQsb7xO00mX3NlUwdOcIivTESChGJR-lDyhbTX7Z4yBMBVt219bNVtVoZPOG0shqyEcbk7ooPBhGMaEkm1vpvj4_JZ9HTPua1XNfgBayIV6dF3h-gnoxN9-tbqh-BH44sUmcA0DQbkQ1gIdA6INQT6Enxw8JAz8X1u9rHoFtsUnolQ",
+    "developer.email": "xxxxx",
+    "org_id": "",
+    "token_type": "Bearer",
+    "refresh_token": "<em>b683693d10ecc1fef8b9fbb86e56b831</em>",
+    "client_id": "[your clientid]",
+    "old_access_token_life_time": "23339",
+    "access_token": "<em>52d739c0f63fd4f8ed620fae2033628c</em>",
+    "organization_name": "ssatbdev",
+    "refresh_token_expires_in": "0",
+    "refresh_count": "1"
+}
+</pre>
+
+        <h4>End the Session and Log the user out</h4>
+        <h5>Request:</h5>
+        <pre>
+GET @(ViewBag.AuthorizationServerEndpoint)/endsession?access_token=<em>52d739c0f63fd4f8ed620fae2033628c</em>&post_logout_redirect_uri=<em>[your post logout redirecturl]</em> HTTP/1.1
+</pre>
+        <h5>Response:</h5>
+        The users logon session is terminated at the Authorization Server (they will be prompted to sign in again on the next request for an authorization code),
+        and the browser is redirected to the post_logout_redirect_uri.
+        Note that there may be a series of intermediary redirects before the final redirect to your post logout redirect url.
+        <pre>
+HTTP/1.1 302 Post Logout Redirect
+Location: [your post logout redirecturl]
+</pre>
+
+        <h1>Terms of use</h1>
+        Welcome to SSATB’s API Services! We’re delighted to have you on our website and maybe even using our service (the “Services”).
+        Please continue reading to learn about the terms by which you may use our Services. If you have questions about this Agreement, please contact us at members@ssat.org.
+
+        <p><div class="well">@Html.Partial("_TermsOfUse")</div></p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $('#toc').toc({ 'selectors': 'h1,h2,h3,h4' });
+    });
+</script>

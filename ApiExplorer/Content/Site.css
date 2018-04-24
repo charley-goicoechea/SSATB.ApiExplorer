@@ -1,0 +1,114 @@
+﻿body {
+    padding-bottom: 20px;
+    margin-top: 50px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-top: 50px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+#SSATBLogo {
+    background: url('bg_header_global.png');
+    display: inline-block;
+    padding:10px;
+}
+
+#SSATBLogo a {
+    background: url('SSATB_logo.png');
+    width:175px;
+    height:84px;
+    display: inline-block;
+}
+.field-validation-error, .validation-summary-errors {
+    color: red;
+    display: block;
+}
+.validation-summary-errors ul {
+    list-style-type: none;
+    padding-left: 0px;
+}
+
+#devresourcescontainer #docs {
+    margin-left:270px;
+}
+#toc {
+    top: 0px;
+    height: 100%;
+    position: fixed;
+    background: #333;
+    box-shadow: inset -5px 0 5px 0px #000;
+    width: 250px;
+    padding-top: 100px;
+    color: #fff;
+}
+#toc ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#toc li {
+    padding: 5px 10px;
+}
+#toc a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+}
+#toc .toc-h2 {
+    padding-left: 10px;
+}
+#toc .toc-h3 {
+    padding-left: 20px;
+}
+#toc .toc-h4 {
+    padding-left: 30px;
+}
+#toc .toc-active {
+    background: #336699;
+    box-shadow: inset -5px 0px 10px -5px #000;
+}
+
+#devresourcescontainer em {
+    background-color: yellow;
+    font-style: normal;
+}
+
+#devresourcescontainer h4 {
+    margin-top: 30px;
+}
+
+#devresourcescontainer h5 {
+    margin-top: 20px;
+}
+h5:first-child {
+    margin-top: 0px;
+    background-color: yellow;
+}
+
+.terms-of-use h3 {
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.terms-of-use p {
+    text-indent: 50px;
+    font-size: 12px;
+}
